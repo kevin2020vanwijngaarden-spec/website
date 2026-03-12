@@ -5,6 +5,13 @@ const particlesContainer = document.getElementById("particles");
 const glow1 = document.querySelector(".glow-1");
 const glow2 = document.querySelector(".glow-2");
 
+const localTime = document.getElementById("localTime");
+const timeZoneLabel = document.getElementById("timeZoneLabel");
+const availabilityStatus = document.getElementById("availabilityStatus");
+const availabilityText = document.getElementById("availabilityText");
+
+const portfolioTimeZone = "Europe/Amsterdam";
+
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
@@ -74,3 +81,52 @@ window.addEventListener("mousemove", (e) => {
   glow1.style.transform = `translate(${x * 25}px, ${y * 25}px)`;
   glow2.style.transform = `translate(-${x * 25}px, -${y * 25}px)`;
 });
+
+function updateAmsterdamTime() {
+  if (timeZoneLabel) {
+    timeZoneLabel.textContent = portfolioTimeZone;
+  }
+
+  const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: portfolioTimeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const hourFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: portfolioTimeZone,
+    hour: "2-digit",
+    hour12: false,
+  });
+
+  const now = new Date();
+  const currentTimeString = timeFormatter.format(now);
+  const currentHour = Number(hourFormatter.format(now));
+
+  if (localTime) {
+    localTime.textContent = currentTimeString;
+  }
+
+  const isAvailable = currentHour >= 8 && currentHour < 17;
+
+  if (availabilityStatus && availabilityText) {
+    availabilityStatus.classList.remove("status-open", "status-closed");
+
+    if (isAvailable) {
+      availabilityStatus.textContent = "Available now";
+      availabilityStatus.classList.add("status-open");
+      availabilityText.textContent =
+        "It’s currently between 08:00 and 17:00 in my time zone, so I’m usually around to react to contact.";
+    } else {
+      availabilityStatus.textContent = "Outside contact hours";
+      availabilityStatus.classList.add("status-closed");
+      availabilityText.textContent =
+        "I usually react to contact between 08:00 and 17:00 my local time. You can still message me and I’ll get back to you.";
+    }
+  }
+}
+
+updateAmsterdamTime();
+setInterval(updateAmsterdamTime, 1000);
